@@ -13,33 +13,47 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ;===================================================================================================
 
 ; Current shot type being used.
-; Defaults to kShotsForward at the start of each session but persists between stages.
+; Defaults to kShotsFireSign at the start of each session but persists between stages.
 currentShotType := 0
 
 ; Constants defining the different shot types available with Patchy
-kShotsForward  := 0
-kShotsSpread   := 1
-kShotsTriple   := 2
-kShotsSidewise := 3
-kShotsBackward := 4
+kShotsFireSign  := 0
+kShotsWaterSign := 1
+kShotsWoodSign  := 2
+kShotsMetalSign := 3
+kShotsEarthSign := 4
 
 
 ;===================================================================================================
 ;Shortcuts
 ;===================================================================================================
-Hotkey  *Space,   CycleShots        ; Pressing Space will cycle shot types
-Hotkey  *C,       SetShotsForward   ; Pressing C will set the shot type to forward.
-HotKey  *D,       SetShotsSpread    ; Pressing D will set the shot type to spread.
-HotKey  *S,       SetShotsTriple    ; Pressing S will set the shot type to triple.
-HotKey  *A,       SetShotsSidewise  ; Pressing A will set the shot type to sidewise.
-HotKey  *F,       SetShotsBackward  ; Pressing F will set the shot type to backward.
+Hotkey  *Space,    CycleShots        ; Pressing Space will cycle shot types
+Hotkey  *C,        SetShotsFireSign  ; Pressing C will set the shot type to Fire Sign.
+HotKey  *A,        SetShotsWaterSign ; Pressing A will set the shot type to Water Sign.
+HotKey  *S,        SetShotsWoodSign  ; Pressing S will set the shot type to Wood Sign.
+HotKey  *V,        SetShotsMetalSign ; Pressing V will set the shot type to Metal Sign.
+HotKey  *D,        SetShotsEarthSign ; Pressing D will set the shot type to Earth Sign.
+HotKey  *RControl, Reset             ; Resets the script logic to shot type 0.
+									 ; Players will need to hit reset when they die in the middle of a SetShot hotkey or use the default shot change.
 
 
 ;===================================================================================================
 ;GUI
 ;===================================================================================================
-Gui, Add, Button, gStop, % "Stop"
-Gui, Show, w250 h50, % "[SA] MarisaPatchy Shot Macro"
+Gui, Add, Button, w130 gReset, % "Reset"
+Gui, Add, Button, w130 gStop,  % "Stop"
+Gui, Add, Text, vShotText, % "Active Shot: Fire Sign____" ; The text here needs to be large enough to store the other shot names, but it won't allow whitespace even in quotes
+Gui, Add, Picture, w130 h100 vShotImage, images/Fire Sign.png
+Gui, Color, EB3636
+Gui, Show, w150 h190, % "[SA] MarisaPatchy Shot Macro"
+UpdateGUI()
+
+
+;===================================================================================================
+;Timed Tasks
+;===================================================================================================
+#Persistent
+SetTimer, UpdateGUI, 1000
 return
 
 
@@ -54,28 +68,33 @@ CycleShots:
 	CycleShots()
 	return
 
-SetShotsForward:
-	SetShots(kShotsForward)
+SetShotsFireSign:
+	SetShots(kShotsFireSign)
 	return
 
-SetShotsSpread:
-	SetShots(kShotsSpread)
+SetShotsWaterSign:
+	SetShots(kShotsWaterSign)
 	return
 
-SetShotsTriple:
-	SetShots(kShotsTriple)
+SetShotsWoodSign:
+	SetShots(kShotsWoodSign)
 	return
 
-SetShotsSidewise:
-	SetShots(kShotsSidewise)
+SetShotsMetalSign:
+	SetShots(kShotsMetalSign)
 	return
 
-SetShotsBackward:
-	SetShots(kShotsBackward)
+SetShotsEarthSign:
+	SetShots(kShotsEarthSign)
 	return
 
 Reset:
 	currentShotType = 0
+	UpdateGUI()
+	return
+
+UpdateGUI:
+	UpdateGUI()
 	return
 
 Stop:
@@ -94,8 +113,8 @@ CycleShots()
 {
 	; Global variables
 	global currentShotType
-	global kShotsForward
-	global kShotsBackward
+	global kShotsFireSign
+	global kShotsEarthSign
 	
 	; Store current states to restore them later
 	lShiftInitialState := GetKeyState("LShift", "P")
@@ -125,8 +144,10 @@ CycleShots()
 	
 	currentShotType++
 	
-	if(currentShotType > kShotsBackward)
-		currentShotType := kShotsForward
+	if(currentShotType > kShotsEarthSign)
+		currentShotType := kShotsFireSign
+	
+	UpdateGUI()
 }
 
 
@@ -135,7 +156,7 @@ SetShots(shotType)
 {
 	; Global variables
 	global currentShotType
-	global kShotsBackward
+	global kShotsEarthSign
 	
 	difference  := shotType - currentShotType
 	
@@ -143,11 +164,85 @@ SetShots(shotType)
 		loopCounter := Abs(difference)
 	
 	else
-		loopCounter := difference + kShotsBackward + 1
+		loopCounter := difference + kShotsEarthSign + 1
 	
 	Loop, %loopCounter%
 	{
 		Sleep, 40
 		CycleShots()
 	}
+}
+
+ShotTypeToString(shotType)
+{
+	; Global variables
+	global kShotsFireSign
+	global kShotsWaterSign
+	global kShotsWoodSign
+	global kShotsMetalSign
+	global kShotsEarthSign
+	
+	shotTypeStr := ""
+	
+	if(shotType == kShotsFireSign)
+		shotTypeStr := "Fire Sign"
+	
+	else if(shotType == kShotsWaterSign)
+		shotTypeStr := "Water Sign"
+	
+	else if(shotType == kShotsWoodSign)
+		shotTypeStr := "Wood Sign"
+		
+	else if(shotType == kShotsMetalSign)
+		shotTypeStr := "Metal Sign"
+	
+	else if(shotType == kShotsEarthSign)
+		shotTypeStr := "Earth Sign"
+	
+	return shotTypeStr
+}
+
+ShotTypeToColor(shotType)
+{
+	; Global variables
+	global kShotsFireSign
+	global kShotsWaterSign
+	global kShotsWoodSign
+	global kShotsMetalSign
+	global kShotsEarthSign
+	
+	shotTypeColor := 000000
+	
+	if(shotType == kShotsFireSign)
+		shotTypeColor := "EB3636"
+	
+	else if(shotType == kShotsWaterSign)
+		shotTypeColor := "0CB0FC"
+	
+	else if(shotType == kShotsWoodSign)
+		shotTypeColor := "24FC0C"
+		
+	else if(shotType == kShotsMetalSign)
+		shotTypeColor := "FCDC0C"
+	
+	else if(shotType == kShotsEarthSign)
+		shotTypeColor := "FC880C"
+	
+	return shotTypeColor
+}
+
+; Updates the GUI based on the current shot
+UpdateGUI()
+{
+	; Global Variables
+	global currentShotType
+	
+	shotName  := ShotTypeToString(currentShotType)
+	shotColor := ShotTypeToColor(currentShotType)
+	
+	GuiControl,, ShotText, % "Active Shot: " . shotName
+	GuiControl,, ShotImage, % "images/" . shotName . ".png"
+	Gui +LastFound  
+	Gui, Color, % shotColor
+
 }
