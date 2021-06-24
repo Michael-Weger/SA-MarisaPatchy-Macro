@@ -1,8 +1,6 @@
 ### Purpose
 I decided to make this script because I had been looking to learn to use AHK for some time now, but I've always found a script for my purpose online at the ready. Now I'll be able to make more scripts in the future be it for other games or more productive tasks requiring some form of automation. 
 
-If I ever 1CC SA using this script I'd probably feel cheaty about it, but that's unlikely to happen anyway.
-
 ### Overview
 An AHK macro for playing Marisa+Patchy in Touhou 11: Subterranean Animism
 
